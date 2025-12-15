@@ -23,7 +23,8 @@ type Action =
     | { type: 'UPDATE_CARD'; payload: Card }
     | { type: 'DELETE_CARD'; payload: string }
     | { type: 'REVIEW_CARD'; payload: { cardId: string; rating: CardRating; timeSpent: number } }
-    | { type: 'SET_CURRENT_DECK'; payload: string | null };
+    | { type: 'SET_CURRENT_DECK'; payload: string | null }
+    | { type: 'IMPORT_DECK'; payload: { deck: Deck; cards: Card[] } };
 
 // Начальное состояние
 const initialState: AppState = {
@@ -122,6 +123,34 @@ function appReducer(state: AppState, action: Action): AppState {
                 ...state,
                 currentDeckId: action.payload,
             };
+
+        case 'IMPORT_DECK': {
+            const { deck, cards } = action.payload;
+
+            // Generate new IDs to prevent conflicts
+            const newDeckId = generateId();
+            const newDeck: Deck = {
+                ...deck,
+                id: newDeckId,
+                createdAt: Date.now(), // Reset created date for import
+            };
+
+            const newCards: Card[] = cards.map(card => ({
+                ...card,
+                id: generateId(),
+                deckId: newDeckId,
+                createdAt: Date.now(),
+            }));
+
+            DeckStorage.save(newDeck);
+            newCards.forEach(card => CardStorage.save(card));
+
+            return {
+                ...state,
+                decks: [...state.decks, newDeck],
+                cards: [...state.cards, ...newCards],
+            };
+        }
 
         default:
             return state;
@@ -232,5 +261,15 @@ export function useCardActions() {
         reviewCard: (cardId: string, rating: CardRating, timeSpent: number) => {
             dispatch({ type: 'REVIEW_CARD', payload: { cardId, rating, timeSpent } });
         },
+    };
+}
+
+export function useImportActions() {
+    const { dispatch } = useApp();
+
+    return {
+        importDeck: (deck: Deck, cards: Card[]) => {
+            dispatch({ type: 'IMPORT_DECK', payload: { deck, cards } });
+        }
     };
 }

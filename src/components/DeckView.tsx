@@ -82,13 +82,13 @@ export function DeckView() {
                 <div className="flex gap-3">
                     {dueCards.length > 0 && (
                         <Button onClick={handleStartStudy} className="bg-emerald-500 hover:bg-emerald-600">
-                            <Play className="w-5 h-5 inline mr-2" />
-                            Повторить ({dueCards.length})
+                            <Play className="w-5 h-5 inline md:mr-2" />
+                            <span className="hidden md:inline">Повторить ({dueCards.length})</span>
                         </Button>
                     )}
                     <Button onClick={() => handleOpenModal()}>
-                        <Plus className="w-5 h-5 inline mr-2" />
-                        Добавить карточку
+                        <Plus className="w-5 h-5 inline md:mr-2" />
+                        <span className="hidden md:inline">Добавить карточку</span>
                     </Button>
                 </div>
             </div>

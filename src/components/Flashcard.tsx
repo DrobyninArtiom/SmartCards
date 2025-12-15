@@ -66,10 +66,10 @@ export function Flashcard({ card, onRate, remainingCards }: FlashcardProps) {
 
             {/* Кнопки оценки - показывать только когда карточка перевернута */}
             {isFlipped && (
-                <div className="mt-8 flex gap-3 animate-in fade-in duration-300">
+                <div className="mt-8 flex flex-col md:flex-row gap-3 w-full md:w-auto animate-in fade-in duration-300">
                     <Button
                         onClick={() => handleRate('again')}
-                        className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white"
+                        className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white w-full md:w-auto"
                     >
                         <RotateCcw className="w-4 h-4" />
                         Повтор
@@ -77,7 +77,7 @@ export function Flashcard({ card, onRate, remainingCards }: FlashcardProps) {
                     <Button
                         variant="secondary"
                         onClick={() => handleRate('hard')}
-                        className="flex items-center gap-2"
+                        className="flex items-center justify-center gap-2 w-full md:w-auto"
                     >
                         <Brain className="w-4 h-4" />
                         Трудно
@@ -85,14 +85,14 @@ export function Flashcard({ card, onRate, remainingCards }: FlashcardProps) {
                     <Button
                         variant="secondary"
                         onClick={() => handleRate('good')}
-                        className="flex items-center gap-2"
+                        className="flex items-center justify-center gap-2 w-full md:w-auto"
                     >
                         <Check className="w-4 h-4" />
                         Нормально
                     </Button>
                     <Button
                         onClick={() => handleRate('easy')}
-                        className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600"
+                        className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 w-full md:w-auto"
                     >
                         <Zap className="w-4 h-4" />
                         Легко
