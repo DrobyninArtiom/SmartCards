@@ -12,8 +12,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-smart-surface rounded-2xl shadow-2xl w-full max-w-md">
-                <div className="flex items-center justify-between p-6 border-b border-white/5">
+            <div className="bg-neutral-800 rounded-2xl shadow-2xl w-full max-w-md">
+                <div className="flex items-center justify-between p-6 border-b border-white/5 bg-neutral-800 z-10 sticky top-0">
                     <h2 className="text-xl font-semibold text-smart-text">{title}</h2>
                     <button
                         onClick={onClose}
@@ -22,7 +22,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
                         <X className="w-5 h-5 text-smart-text-muted" />
                     </button>
                 </div>
-                <div className="p-6">{children}</div>
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">{children}</div>
             </div>
         </div>
     );
@@ -39,7 +39,7 @@ export function Button({ variant = 'primary', children, className = '', ...props
     const variants = {
         primary: 'bg-emerald-400 text-white hover:bg-emerald-500',
         secondary: 'bg-white/5 text-smart-text hover:bg-white/10',
-        danger: 'bg-red-500/10 text-red-400 hover:bg-red-500/20',
+        danger: 'bg-red-500 text-white hover:bg-red-600',
     };
 
     return (

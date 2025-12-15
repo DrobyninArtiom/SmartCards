@@ -1,22 +1,21 @@
-import type { Card, CardRating, CardState } from '../types';
+import type { Card, CardRating, CardState, SRSSettings } from '../types';
 
 // Константы алгоритма SM-2
 const EASE_FACTOR_MIN = 1.3;
 const EASE_FACTOR_DEFAULT = 2.5;
 const EASE_FACTOR_MAX = 2.5;
 
-// Множители интервала для разных оценок
-const RATING_MULTIPLIERS = {
-    again: 0,
-    hard: 1.2,
-    good: 2.5,
-    easy: 3.0,
-} as const;
+export const DEFAULT_SRS_SETTINGS: SRSSettings = {
+    againDelayMinutes: 10,
+    hardMultiplier: 1.2,
+    goodMultiplier: 2.5,
+    easyMultiplier: 3.0,
+};
 
 /**
  * Рассчитать параметры следующего повторения на основе алгоритма SM-2
  */
-export function calculateNextReview(card: Card, rating: CardRating): Partial<Card> {
+export function calculateNextReview(card: Card, rating: CardRating, settings: SRSSettings = DEFAULT_SRS_SETTINGS): Partial<Card> {
     const now = Date.now();
 
     // "Снова" - сброс карточки
@@ -25,7 +24,7 @@ export function calculateNextReview(card: Card, rating: CardRating): Partial<Car
             state: 'relearning' as CardState,
             interval: 0,
             repetition: 0,
-            nextReviewDate: now + 10 * 60 * 1000, // 10 минут
+            nextReviewDate: now + settings.againDelayMinutes * 60 * 1000,
             easeFactor: Math.max(card.easeFactor - 0.2, EASE_FACTOR_MIN),
         };
     }
@@ -47,7 +46,13 @@ export function calculateNextReview(card: Card, rating: CardRating): Partial<Car
     } else if (newRepetition === 2) {
         newInterval = 6; // 6 дней
     } else {
-        newInterval = Math.round(card.interval * newEaseFactor * RATING_MULTIPLIERS[rating]);
+        let multiplier = 1;
+        switch (rating) {
+            case 'hard': multiplier = settings.hardMultiplier; break;
+            case 'good': multiplier = settings.goodMultiplier; break;
+            case 'easy': multiplier = settings.easyMultiplier; break;
+        }
+        newInterval = Math.round(card.interval * newEaseFactor * multiplier);
     }
 
     // Рассчитать дату следующего повторения

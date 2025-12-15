@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { Card, Deck, ReviewLog, CardRating } from '../types';
-import { DeckStorage, CardStorage, ReviewStorage } from '../lib/storage';
-import { calculateNextReview, createNewCard } from '../lib/srs';
+import type { Card, Deck, ReviewLog, CardRating, SRSSettings } from '../types';
+import { DeckStorage, CardStorage, ReviewStorage, SettingsStorage } from '../lib/storage';
+import { calculateNextReview, createNewCard, DEFAULT_SRS_SETTINGS } from '../lib/srs';
 import { generateId } from '../lib/utils';
 
 // Структура состояния
@@ -11,11 +11,12 @@ interface AppState {
     cards: Card[];
     reviews: ReviewLog[];
     currentDeckId: string | null;
+    settings: SRSSettings;
 }
 
 // Типы действий
 type Action =
-    | { type: 'LOAD_DATA'; payload: { decks: Deck[]; cards: Card[]; reviews: ReviewLog[] } }
+    | { type: 'LOAD_DATA'; payload: { decks: Deck[]; cards: Card[]; reviews: ReviewLog[]; settings: SRSSettings } }
     | { type: 'ADD_DECK'; payload: Deck }
     | { type: 'UPDATE_DECK'; payload: Deck }
     | { type: 'DELETE_DECK'; payload: string }
@@ -24,7 +25,8 @@ type Action =
     | { type: 'DELETE_CARD'; payload: string }
     | { type: 'REVIEW_CARD'; payload: { cardId: string; rating: CardRating; timeSpent: number } }
     | { type: 'SET_CURRENT_DECK'; payload: string | null }
-    | { type: 'IMPORT_DECK'; payload: { deck: Deck; cards: Card[] } };
+    | { type: 'IMPORT_DECK'; payload: { deck: Deck; cards: Card[] } }
+    | { type: 'UPDATE_SETTINGS'; payload: SRSSettings };
 
 // Начальное состояние
 const initialState: AppState = {
@@ -32,6 +34,7 @@ const initialState: AppState = {
     cards: [],
     reviews: [],
     currentDeckId: null,
+    settings: DEFAULT_SRS_SETTINGS,
 };
 
 // Редьюсер
@@ -43,6 +46,7 @@ function appReducer(state: AppState, action: Action): AppState {
                 decks: action.payload.decks,
                 cards: action.payload.cards,
                 reviews: action.payload.reviews,
+                settings: action.payload.settings,
             };
 
         case 'ADD_DECK':
@@ -98,7 +102,7 @@ function appReducer(state: AppState, action: Action): AppState {
             const card = state.cards.find(c => c.id === action.payload.cardId);
             if (!card) return state;
 
-            const updates = calculateNextReview(card, action.payload.rating);
+            const updates = calculateNextReview(card, action.payload.rating, state.settings);
             const updatedCard = { ...card, ...updates };
             CardStorage.save(updatedCard);
 
@@ -152,6 +156,13 @@ function appReducer(state: AppState, action: Action): AppState {
             };
         }
 
+        case 'UPDATE_SETTINGS':
+            SettingsStorage.save(action.payload);
+            return {
+                ...state,
+                settings: action.payload,
+            };
+
         default:
             return state;
     }
@@ -172,7 +183,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const decks = DeckStorage.getAll();
         const cards = CardStorage.getAll();
         const reviews = ReviewStorage.getAll();
-        dispatch({ type: 'LOAD_DATA', payload: { decks, cards, reviews } });
+        const settings = SettingsStorage.get() || DEFAULT_SRS_SETTINGS;
+        dispatch({ type: 'LOAD_DATA', payload: { decks, cards, reviews, settings } });
     }, []);
 
     return (
@@ -270,6 +282,17 @@ export function useImportActions() {
     return {
         importDeck: (deck: Deck, cards: Card[]) => {
             dispatch({ type: 'IMPORT_DECK', payload: { deck, cards } });
+        }
+    };
+}
+
+export function useSettings() {
+    const { state, dispatch } = useApp();
+
+    return {
+        settings: state.settings,
+        updateSettings: (settings: SRSSettings) => {
+            dispatch({ type: 'UPDATE_SETTINGS', payload: settings });
         }
     };
 }

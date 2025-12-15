@@ -1,8 +1,9 @@
-import { Plus, BookOpen, Trash2, Share, Download, Edit } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Share, Download, Edit, Settings } from 'lucide-react';
 import { useState, useMemo, useRef } from 'react';
 import { useDeckActions, useDecks, useCards, useImportActions } from '../store/AppContext';
 import { getDueCards } from '../lib/srs';
 import { Modal, Button, Input, TextArea } from './ui';
+import { SettingsModal } from './SettingsModal';
 import type { Deck, Card } from '../types';
 
 export function DeckList() {
@@ -11,6 +12,7 @@ export function DeckList() {
     const { createDeck, updateDeck, deleteDeck, setCurrentDeck } = useDeckActions();
     const { importDeck } = useImportActions();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [deckName, setDeckName] = useState('');
     const [deckDescription, setDeckDescription] = useState('');
     const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
@@ -120,7 +122,7 @@ export function DeckList() {
     return (
         <div className="p-8 max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-smart-text">Мои Наборы</h1>
+                <h1 className="text-3xl font-bold text-smart-text">Мои наборы</h1>
 
                 <div className="flex gap-3">
                     <input
@@ -130,6 +132,9 @@ export function DeckList() {
                         onChange={handleFileChange}
                         className="hidden"
                     />
+                    <Button variant="secondary" onClick={() => setIsSettingsOpen(true)} title="Настройки">
+                        <Settings className="w-5 h-5" />
+                    </Button>
                     <Button variant="secondary" onClick={handleImportClick}>
                         <Download className="w-5 h-5 inline md:mr-2" />
                         <span className="hidden md:inline">Импорт</span>
@@ -141,22 +146,14 @@ export function DeckList() {
                 </div>
             </div>
 
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+
             {decks.length === 0 ? (
                 <div className="text-center py-20">
                     <BookOpen className="w-16 h-16 mx-auto mb-4 text-smart-text-muted/50" />
-                    <p className="text-smart-text-muted text-lg mb-6">
+                    <p className="text-white/30 text-lg mb-6">
                         У вас пока нет наборов
                     </p>
-                    <div className="flex justify-center gap-4">
-                        <Button variant="secondary" onClick={handleImportClick}>
-                            <Download className="w-5 h-5 inline md:mr-2" />
-                            <span className="hidden md:inline">Импорт</span>
-                        </Button>
-                        <Button onClick={() => handleOpenModal()}>
-                            <Plus className="w-5 h-5 inline md:mr-2" />
-                            <span className="hidden md:inline">Создать первый набор</span>
-                        </Button>
-                    </div>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

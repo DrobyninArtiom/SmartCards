@@ -47,3 +47,10 @@ export interface DeckStats {
     reviewCards: number;
     dueToday: number;
 }
+
+export interface SRSSettings {
+    againDelayMinutes: number; // 10
+    hardMultiplier: number;    // 1.2
+    goodMultiplier: number;    // 2.5
+    easyMultiplier: number;    // 3.0
+}

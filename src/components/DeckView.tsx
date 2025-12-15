@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Edit, Trash2, Play } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Play, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import type { Card } from '../types';
 import { useCardActions, useCards, useCurrentDeck, useDeckActions } from '../store/AppContext';
@@ -95,6 +95,7 @@ export function DeckView() {
 
             {cards.length === 0 ? (
                 <div className="text-center py-20">
+                    <BookOpen className="w-16 h-16 mx-auto mb-4 text-smart-text-muted/50" />
                     <p className="text-white/30 text-lg mb-6">
                         В этом наборе пока нет карточек
                     </p>

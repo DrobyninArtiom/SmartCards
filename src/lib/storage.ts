@@ -1,9 +1,10 @@
-import type { Card, Deck, ReviewLog } from '../types';
+import type { Card, Deck, ReviewLog, SRSSettings } from '../types';
 
 const STORAGE_KEYS = {
     DECKS: 'smartcards_decks',
     CARDS: 'smartcards_cards',
     REVIEWS: 'smartcards_reviews',
+    SETTINGS: 'smartcards_settings',
 } as const;
 
 // Общие утилиты хранилища
@@ -130,6 +131,17 @@ export const ReviewStorage = {
 
     clear(): void {
         Storage.set(STORAGE_KEYS.REVIEWS, []);
+    },
+};
+
+// Операции с настройками
+export const SettingsStorage = {
+    get(): SRSSettings | null {
+        return Storage.get<SRSSettings>(STORAGE_KEYS.SETTINGS);
+    },
+
+    save(settings: SRSSettings): void {
+        Storage.set(STORAGE_KEYS.SETTINGS, settings);
     },
 };
 
