@@ -1,14 +1,15 @@
-
+import { useCurrentDeck } from './store/AppContext';
+import { DeckList } from './components/DeckList';
+import { DeckView } from './components/DeckView';
 
 function App() {
+  const currentDeck = useCurrentDeck();
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold text-smart-green tracking-wider">
-        SmartCards
-      </h1>
-      <p className="mt-4 text-smart-text-muted">Начало разработки</p>
+    <div className="min-h-screen">
+      {currentDeck ? <DeckView /> : <DeckList />}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

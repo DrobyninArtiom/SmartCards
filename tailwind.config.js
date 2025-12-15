@@ -7,11 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        'smart-bg': '#121212',
-        'smart-surface': '#1F1F1F',
-        'smart-green': '#00E676', // Bright green from screenshot
-        'smart-text': '#E0E0E0',
-        'smart-text-muted': '#A0A0A0',
+        'smart-bg': '#0f172a',        // Slate 900 - deep blue-gray
+        'smart-surface': '#1e293b',   // Slate 800 - lighter surface
+        'smart-accent': '#22d3ee',    // Cyan 400 - brighter, more visible
+        'smart-text': '#f1f5f9',      // Slate 100 - primary text
+        'smart-text-muted': '#94a3b8', // Slate 400 - muted text
       }
     },
   },
