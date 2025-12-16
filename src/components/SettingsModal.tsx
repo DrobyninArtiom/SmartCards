@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSettings } from '../store/AppContext';
 import { Modal, Button, Input } from './ui';
 import type { SRSSettings } from '../types';
@@ -12,11 +12,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const { settings, updateSettings } = useSettings();
     const [localSettings, setLocalSettings] = useState<SRSSettings>(settings);
 
-    useEffect(() => {
-        if (isOpen) {
-            setLocalSettings(settings);
-        }
-    }, [isOpen, settings]);
+
 
     const handleChange = (key: keyof SRSSettings, value: string) => {
         const numValue = parseFloat(value);

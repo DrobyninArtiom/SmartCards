@@ -2,9 +2,10 @@ import { Plus, BookOpen, Trash2, Share, Download, Edit, Settings } from 'lucide-
 import { useState, useMemo, useRef } from 'react';
 import { useDeckActions, useDecks, useCards, useImportActions } from '../store/AppContext';
 import { getDueCards } from '../lib/srs';
+import { calculateGlobalStats } from '../lib/stats';
 import { Modal, Button, Input, TextArea } from './ui';
 import { SettingsModal } from './SettingsModal';
-import type { Deck, Card } from '../types';
+import type { Deck } from '../types';
 
 export function DeckList() {
     const decks = useDecks();
@@ -31,6 +32,9 @@ export function DeckList() {
         });
         return stats;
     }, [decks, allCards]);
+
+    // Calculate global stats
+    const globalStats = useMemo(() => calculateGlobalStats(allCards), [allCards]);
 
     const handleOpenModal = (deck?: Deck) => {
         if (deck) {
@@ -133,20 +137,23 @@ export function DeckList() {
                         className="hidden"
                     />
                     <Button variant="secondary" onClick={() => setIsSettingsOpen(true)} title="Настройки">
-                        <Settings className="w-5 h-5" />
+                        <Settings className="w-5 h-5 inline md:mr-2" />
+                        <span className="hidden md:inline">Настройки</span>
                     </Button>
-                    <Button variant="secondary" onClick={handleImportClick}>
+                    <Button variant="secondary" onClick={handleImportClick} title="Импортировать набор из JSON">
                         <Download className="w-5 h-5 inline md:mr-2" />
                         <span className="hidden md:inline">Импорт</span>
                     </Button>
-                    <Button onClick={() => handleOpenModal()}>
+                    <Button onClick={() => handleOpenModal()} title="Создать новый набор">
                         <Plus className="w-5 h-5 inline md:mr-2" />
                         <span className="hidden md:inline">Создать набор</span>
                     </Button>
                 </div>
             </div>
 
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+            {isSettingsOpen && (
+                <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+            )}
 
             {decks.length === 0 ? (
                 <div className="text-center py-20">
@@ -164,6 +171,7 @@ export function DeckList() {
                             <div
                                 key={deck.id}
                                 onClick={() => setCurrentDeck(deck.id)}
+                                title="Открыть набор"
                                 className="bg-white/10 hover:bg-white/15 rounded-xl p-6 transition-all cursor-pointer group flex flex-col"
                             >
                                 <div className="flex items-start justify-between mb-2">
@@ -217,6 +225,28 @@ export function DeckList() {
                     })}
                 </div>
             )}
+
+            <div className="mt-12">
+                <h2 className="text-xl font-semibold text-smart-text mb-4">Статистика</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white/5 rounded-xl p-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl font-bold text-white mb-1">{globalStats.total}</div>
+                        <div className="text-smart-text-muted text-sm">Всего карточек</div>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl font-bold text-blue-400 mb-1">{globalStats.new}</div>
+                        <div className="text-smart-text-muted text-sm">Новые</div>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl font-bold text-emerald-400 mb-1">{globalStats.learning}</div>
+                        <div className="text-smart-text-muted text-sm">Изучаю</div>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl font-bold text-orange-400 mb-1">{globalStats.review}</div>
+                        <div className="text-smart-text-muted text-sm">На повторение</div>
+                    </div>
+                </div>
+            </div>
 
             <Modal
                 isOpen={isModalOpen}

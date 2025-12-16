@@ -54,21 +54,24 @@ export function DeckView() {
         }
     };
 
+    const dueCards = getDueCards(cards);
+
     const handleStartStudy = () => {
         setIsStudying(true);
     };
 
     if (isStudying) {
-        return <StudySession onExit={() => setIsStudying(false)} />;
+        return <StudySession cards={dueCards} onExit={() => setIsStudying(false)} />;
     }
 
-    const dueCards = getDueCards(cards);
+
 
     return (
         <div className="p-8 max-w-7xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => setCurrentDeck(null)}
+                    title="Вернуться к списку наборов"
                     className="p-2 hover:bg-white/5 rounded-lg transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6 text-smart-text" />
@@ -81,12 +84,12 @@ export function DeckView() {
                 </div>
                 <div className="flex gap-3">
                     {dueCards.length > 0 && (
-                        <Button onClick={handleStartStudy} className="bg-emerald-500 hover:bg-emerald-600">
+                        <Button onClick={handleStartStudy} title="Начать повторение карточек" className="bg-emerald-500 hover:bg-emerald-600">
                             <Play className="w-5 h-5 inline md:mr-2" />
                             <span className="hidden md:inline">Повторить ({dueCards.length})</span>
                         </Button>
                     )}
-                    <Button onClick={() => handleOpenModal()}>
+                    <Button onClick={() => handleOpenModal()} title="Создать новую карточку">
                         <Plus className="w-5 h-5 inline md:mr-2" />
                         <span className="hidden md:inline">Добавить карточку</span>
                     </Button>
@@ -114,12 +117,14 @@ export function DeckView() {
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => handleOpenModal(card)}
+                                        title="Редактировать карточку"
                                         className="p-1.5 hover:bg-white/5 rounded-lg transition-colors"
                                     >
                                         <Edit className="w-4 h-4 text-smart-text-muted" />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteCard(card.id)}
+                                        title="Удалить карточку"
                                         className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors"
                                     >
                                         <Trash2 className="w-4 h-4 text-red-400" />

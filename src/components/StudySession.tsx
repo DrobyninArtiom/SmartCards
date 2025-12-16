@@ -1,39 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import type { Card } from '../types';
-import { useCardActions, useCards, useCurrentDeck, useDeckActions } from '../store/AppContext';
-import { getDueCards } from '../lib/srs';
+import { useCardActions, useCurrentDeck, useDeckActions } from '../store/AppContext';
+
 import { Flashcard } from './Flashcard';
 import { Button } from './ui';
 import type { CardRating } from '../types';
 
 interface StudySessionProps {
+    cards: Card[];
     onExit?: () => void;
 }
 
-export function StudySession({ onExit }: StudySessionProps = {}) {
+export function StudySession({ cards, onExit }: StudySessionProps) {
     const currentDeck = useCurrentDeck();
-    const allCards = useCards(currentDeck?.id);
     const { setCurrentDeck } = useDeckActions();
     const { reviewCard } = useCardActions();
 
-    const [sessionCards, setSessionCards] = useState<Card[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isComplete, setIsComplete] = useState(false);
+    const [isComplete, setIsComplete] = useState(cards.length === 0);
     const [reviewedCount, setReviewedCount] = useState(0);
 
-    useEffect(() => {
-        // Получить карточки для повторения в этой сессии
-        const dueCards = getDueCards(allCards);
-        setSessionCards(dueCards);
-
-        if (dueCards.length === 0) {
-            setIsComplete(true);
-        }
-    }, [allCards]);
-
     const handleRate = (rating: CardRating) => {
-        const currentCard = sessionCards[currentIndex];
+        const currentCard = cards[currentIndex];
         if (!currentCard) return;
 
         // Записать повторение
@@ -41,7 +30,7 @@ export function StudySession({ onExit }: StudySessionProps = {}) {
         setReviewedCount(prev => prev + 1);
 
         // Переход к следующей карточке
-        if (currentIndex < sessionCards.length - 1) {
+        if (currentIndex < cards.length - 1) {
             setCurrentIndex(prev => prev + 1);
         } else {
             setIsComplete(true);
@@ -79,7 +68,7 @@ export function StudySession({ onExit }: StudySessionProps = {}) {
         );
     }
 
-    const currentCard = sessionCards[currentIndex];
+    const currentCard = cards[currentIndex];
     if (!currentCard) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -119,7 +108,7 @@ export function StudySession({ onExit }: StudySessionProps = {}) {
             <Flashcard
                 card={currentCard}
                 onRate={handleRate}
-                remainingCards={sessionCards.length - currentIndex}
+                remainingCards={cards.length - currentIndex}
             />
         </div>
     );

@@ -1,12 +1,11 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { Card, Deck, ReviewLog, CardRating, SRSSettings } from '../types';
 import { DeckStorage, CardStorage, ReviewStorage, SettingsStorage } from '../lib/storage';
 import { calculateNextReview, createNewCard, DEFAULT_SRS_SETTINGS } from '../lib/srs';
 import { generateId } from '../lib/utils';
 
 // Структура состояния
-interface AppState {
+export interface AppState {
     decks: Deck[];
     cards: Card[];
     reviews: ReviewLog[];
@@ -15,7 +14,7 @@ interface AppState {
 }
 
 // Типы действий
-type Action =
+export type Action =
     | { type: 'LOAD_DATA'; payload: { decks: Deck[]; cards: Card[]; reviews: ReviewLog[]; settings: SRSSettings } }
     | { type: 'ADD_DECK'; payload: Deck }
     | { type: 'UPDATE_DECK'; payload: Deck }
@@ -29,7 +28,7 @@ type Action =
     | { type: 'UPDATE_SETTINGS'; payload: SRSSettings };
 
 // Начальное состояние
-const initialState: AppState = {
+export const initialState: AppState = {
     decks: [],
     cards: [],
     reviews: [],
@@ -38,7 +37,7 @@ const initialState: AppState = {
 };
 
 // Редьюсер
-function appReducer(state: AppState, action: Action): AppState {
+export function appReducer(state: AppState, action: Action): AppState {
     switch (action.type) {
         case 'LOAD_DATA':
             return {
@@ -169,30 +168,10 @@ function appReducer(state: AppState, action: Action): AppState {
 }
 
 // Контекст
-const AppContext = createContext<{
+export const AppContext = createContext<{
     state: AppState;
     dispatch: React.Dispatch<Action>;
 } | null>(null);
-
-// Провайдер
-export function AppProvider({ children }: { children: ReactNode }) {
-    const [state, dispatch] = useReducer(appReducer, initialState);
-
-    // Загрузка данных из localStorage при монтировании
-    useEffect(() => {
-        const decks = DeckStorage.getAll();
-        const cards = CardStorage.getAll();
-        const reviews = ReviewStorage.getAll();
-        const settings = SettingsStorage.get() || DEFAULT_SRS_SETTINGS;
-        dispatch({ type: 'LOAD_DATA', payload: { decks, cards, reviews, settings } });
-    }, []);
-
-    return (
-        <AppContext.Provider value={{ state, dispatch }}>
-            {children}
-        </AppContext.Provider>
-    );
-}
 
 // Хук для использования контекста
 export function useApp() {
@@ -211,15 +190,19 @@ export function useDecks() {
 
 export function useCards(deckId?: string) {
     const { state } = useApp();
-    if (deckId) {
-        return state.cards.filter(card => card.deckId === deckId);
-    }
-    return state.cards;
+    return useMemo(() => {
+        if (deckId) {
+            return state.cards.filter(card => card.deckId === deckId);
+        }
+        return state.cards;
+    }, [state.cards, deckId]);
 }
 
 export function useCurrentDeck() {
     const { state } = useApp();
-    return state.decks.find(deck => deck.id === state.currentDeckId) || null;
+    return useMemo(() => {
+        return state.decks.find(deck => deck.id === state.currentDeckId) || null;
+    }, [state.decks, state.currentDeckId]);
 }
 
 export function useDeckActions() {
